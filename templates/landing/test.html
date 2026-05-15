@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Chat</title>
+</head>
+<body>
+    <h1>Chat Test Page</h1>
+    <input type="text" id="message" placeholder="Type your question">
+    <button onclick="sendMessage()">Send</button>
+    <div id="response"></div>
+
+    <script>
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        async function sendMessage() {
+            const message = document.getElementById('message').value;
+            const responseDiv = document.getElementById('response');
+
+            responseDiv.innerHTML = 'Sending...';
+
+            try {
+                const response = await fetch('/chat/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({message: message})
+                });
+
+                const data = await response.json();
+                responseDiv.innerHTML = '<strong>Response:</strong> ' + (data.response || data.error);
+                console.log('Success:', data);
+            } catch (error) {
+                responseDiv.innerHTML = 'Error: ' + error;
+                console.error('Error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

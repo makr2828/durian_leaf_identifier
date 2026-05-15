@@ -1,0 +1,296 @@
+{% extends 'landing/base.html' %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<style>
+    .hero {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: linear-gradient(135deg, #1a5f3a, #2ecc71);
+        color: white;
+        border-radius: 20px;
+        margin-bottom: 3rem;
+    }
+
+    .hero h1 {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin: 3rem 0;
+    }
+
+    .feature-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        transition: transform 0.3s;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .feature-card i {
+        font-size: 3rem;
+        color: #27ae60;
+        margin-bottom: 1rem;
+    }
+
+    .chat-section {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        margin: 3rem 0;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .chat-messages {
+        height: 450px;
+        overflow-y: auto;
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 1rem;
+        margin: 1rem 0;
+        background: #f9f9f9;
+    }
+
+    .message {
+        margin-bottom: 1rem;
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .message.user {
+        justify-content: flex-end;
+    }
+
+    .message-content {
+        max-width: 70%;
+        padding: 0.75rem 1rem;
+        border-radius: 15px;
+        word-wrap: break-word;
+        line-height: 1.4;
+    }
+
+    .message.user .message-content {
+        background: linear-gradient(135deg, #27ae60, #2ecc71);
+        color: white;
+    }
+
+    .message.bot .message-content {
+        background: #e9ecef;
+        color: #333;
+    }
+
+    .chat-input-area {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .chat-input-area input {
+        flex: 1;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-family: inherit;
+    }
+
+    .chat-input-area input:focus {
+        outline: none;
+        border-color: #27ae60;
+    }
+
+    .typing-indicator {
+        display: none;
+        padding: 0.5rem;
+        color: #666;
+        font-style: italic;
+    }
+
+    @media (max-width: 768px) {
+        .hero h1 {
+            font-size: 2rem;
+        }
+        .message-content {
+            max-width: 85%;
+        }
+    }
+</style>
+
+<div class="container">
+    <div class="hero">
+        <h1>🌿 Durian Leaf Identifier</h1>
+        <p>Identify <strong>D101, Arancillo, and Puyat</strong> Durian Varieties by Their Leaves</p>
+        {% if not user.is_authenticated %}
+            <a href="{% url 'register' %}" class="btn btn-primary" style="margin-top: 1rem; background: white; color: #27ae60; display: inline-block;">
+                Get Started Free
+            </a>
+        {% endif %}
+    </div>
+
+    <div class="features">
+        <div class="feature-card">
+            <i class="fas fa-leaf"></i>
+            <h3>🌿 D101 Durian</h3>
+            <p><strong>Leaf:</strong> Light green, oval shape, flat texture<br>
+            <strong>Fruit:</strong> Sweet, creamy, strong aroma</p>
+        </div>
+        <div class="feature-card">
+            <i class="fas fa-leaf"></i>
+            <h3>🌿 Arancillo Durian</h3>
+            <p><strong>Leaf:</strong> Dark green, long & narrow, prominent veins<br>
+            <strong>Fruit:</strong> Very sweet, bright yellow flesh</p>
+        </div>
+        <div class="feature-card">
+            <i class="fas fa-leaf"></i>
+            <h3>🌿 Puyat Durian</h3>
+            <p><strong>Leaf:</strong> Very dark green, broad & glossy, waxy feel<br>
+            <strong>Fruit:</strong> Sweetest, thick creamy flesh</p>
+        </div>
+    </div>
+
+    <div class="chat-section">
+        <h2><i class="fas fa-comments"></i> Ask the Durian Leaf Expert</h2>
+        <p>Ask me anything about identifying <strong>D101, Arancillo, and Puyat</strong> durian varieties by their leaves!</p>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot">
+                <div class="message-content">
+                    Hello! I'm your Durian Leaf Identifier assistant. Ask me about:
+                    <ul style="margin-top: 0.5rem; margin-left: 1rem;">
+                        <li>How to identify <strong>D101</strong> leaves</li>
+                        <li><strong>Arancillo</strong> leaf characteristics</li>
+                        <li><strong>Puyat</strong> vs D101 differences</li>
+                        <li>How to photograph leaves for identification</li>
+                        <li>Durian tree care and leaf health</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="typing-indicator" id="typingIndicator">
+            <i class="fas fa-robot"></i> AI is thinking...
+        </div>
+
+        <div class="chat-input-area">
+            <input type="text" id="userInput" placeholder="Ask about D101, Arancillo, or Puyat leaves..."
+                   {% if not user.is_authenticated %}disabled placeholder="Please login to chat"{% endif %}>
+            <button class="btn btn-primary" id="sendBtn" {% if not user.is_authenticated %}disabled{% endif %}>
+                <i class="fas fa-paper-plane"></i> Send
+            </button>
+        </div>
+        {% if not user.is_authenticated %}
+            <p style="text-align: center; margin-top: 1rem;">
+                <a href="{% url 'login' %}">Login</a> or <a href="{% url 'register' %}">Register</a> to chat with AI
+            </p>
+        {% endif %}
+    </div>
+</div>
+
+{% if user.is_authenticated %}
+<script>
+    (function() {
+        // Get DOM elements
+        const chatMessages = document.getElementById('chatMessages');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const typingIndicator = document.getElementById('typingIndicator');
+
+        // Function to get CSRF token
+        function getCSRFToken() {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, 10) === 'csrftoken=') {
+                        cookieValue = decodeURIComponent(cookie.substring(10));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Function to add message to chat
+        function addMessage(message, isUser) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            contentDiv.innerHTML = message.replace(/\n/g, '<br>');
+            messageDiv.appendChild(contentDiv);
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Function to send message
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            // Add user message
+            addMessage(message, true);
+            userInput.value = '';
+
+            // Show typing indicator
+            typingIndicator.style.display = 'block';
+            sendBtn.disabled = true;
+
+            try {
+                const response = await fetch('/chat/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCSRFToken()
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+
+                const data = await response.json();
+                typingIndicator.style.display = 'none';
+
+                if (data.success) {
+                    addMessage(data.response, false);
+                } else {
+                    addMessage('Sorry, I encountered an error: ' + (data.error || 'Unknown error'), false);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                typingIndicator.style.display = 'none';
+                addMessage('Network error. Please check your connection and try again.', false);
+            } finally {
+                sendBtn.disabled = false;
+                userInput.focus();
+            }
+        }
+
+        // Add event listeners
+        if (sendBtn) {
+            sendBtn.addEventListener('click', sendMessage);
+        }
+
+        if (userInput) {
+            userInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+        }
+
+        // Console log for debugging
+        console.log('Chat initialized successfully - D101, Arancillo, Puyat');
+        console.log('User authenticated: true');
+    })();
+</script>
+{% endif %}
+{% endblock %}

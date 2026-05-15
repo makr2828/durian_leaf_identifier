@@ -1,0 +1,48 @@
+{% extends 'landing/base.html' %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 2rem auto; background: white; padding: 2rem; border-radius: 15px;">
+    <h2>🌿 Upload Durian Leaf for Identification</h2>
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div style="border: 2px dashed #2ecc71; border-radius: 10px; padding: 2rem; text-align: center; margin: 1rem 0;">
+            <label for="id_image" style="cursor: pointer;">
+                <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: #2ecc71;"></i>
+                <p>Click to upload a durian leaf photo</p>
+                <p style="font-size: 0.8rem; color: #666;">Supports JPG, PNG</p>
+                {{ form.image }}
+            </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%;">🔍 Identify Leaf</button>
+    </form>
+
+    {% if result %}
+    <div style="background: #e8f5e9; padding: 1.5rem; border-radius: 10px; margin-top: 2rem;">
+        <h3>📊 Identification Result</h3>
+        <p><strong>🌿 Variety:</strong> {{ result.variety }}</p>
+        <p><strong>📈 Confidence:</strong> {{ result.confidence }}%</p>
+        <p><strong>📝 Features:</strong> {{ result.features }}</p>
+    </div>
+    {% endif %}
+
+    <div style="margin-top: 2rem; padding: 1rem; background: #fff3e0; border-radius: 10px;">
+        <h4>💡 Tips for best results:</h4>
+        <ul>
+            <li>Take photo in natural daylight</li>
+            <li>Place leaf on plain background</li>
+            <li>Show the top surface clearly</li>
+            <li>Include the whole leaf in frame</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
+<script>
+    document.querySelector('form').addEventListener('submit', function() {
+        const btn = document.querySelector('button[type="submit"]');
+        btn.innerHTML = '🤖 AI Analyzing... Please wait';
+        btn.disabled = true;
+    });
+</script>

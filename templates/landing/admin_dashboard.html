@@ -1,0 +1,104 @@
+{% extends 'landing/base.html' %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<style>
+    .admin-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .admin-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .admin-number {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #e74c3c;
+    }
+
+    .data-table {
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        padding: 0.75rem;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    th {
+        background: #27ae60;
+        color: white;
+    }
+
+    .badge {
+        padding: 0.25rem 0.5rem;
+        border-radius: 5px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .badge-admin {
+        background: #e74c3c;
+        color: white;
+    }
+</style>
+
+<div class="container">
+    <h1><i class="fas fa-crown"></i> Admin Dashboard</h1>
+
+    <div class="admin-stats">
+        <div class="admin-card">
+            <div class="admin-number">{{ total_users }}</div>
+            <div>Total Users</div>
+        </div>
+        <div class="admin-card">
+            <div class="admin-number">{{ total_chats }}</div>
+            <div>Total Chats</div>
+        </div>
+        <div class="admin-card">
+            <div class="admin-number">{{ total_leaf_ids }}</div>
+            <div>Leaf Identifications</div>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <h3><i class="fas fa-users"></i> Registered Users</h3>
+        <div class="data-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Joined</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in all_users %}
+                    <tr>
+                        <td>{{ u.username }}</td>
+                        <td>{{ u.email }}</td>
+                        <td>{{ u.date_joined|date:"Y-m-d" }}</td>
+                        <td>{% if u.is_superuser %}<span class="badge badge-admin">Admin</span>{% else %}User{% endif %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

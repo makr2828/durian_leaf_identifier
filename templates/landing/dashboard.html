@@ -1,0 +1,42 @@
+{% extends 'landing/base.html' %}
+
+{% block content %}
+<div style="background: linear-gradient(135deg, #1a5f3a, #2ecc71); color: white; padding: 2rem; border-radius: 15px; margin-bottom: 2rem;">
+    <h2>👋 Welcome, {{ user.first_name|default:user.username }}!</h2>
+    <p>Your durian leaf identification dashboard</p>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+    <div style="background: white; padding: 1.5rem; border-radius: 15px;">
+        <h3>🌿 Recent Identifications</h3>
+        {% if leaf_identifications %}
+            {% for leaf in leaf_identifications %}
+            <div style="padding: 0.5rem 0; border-bottom: 1px solid #eee;">
+                <strong>{{ leaf.identified_variety }}</strong> - {{ leaf.confidence_score }}%<br>
+                <small>{{ leaf.created_at|date:"M d, Y" }}</small>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>No identifications yet. <a href="{% url 'identify_leaf' %}">Upload a leaf photo!</a></p>
+        {% endif %}
+    </div>
+
+    <div style="background: white; padding: 1.5rem; border-radius: 15px;">
+        <h3>💬 Recent Chats</h3>
+        {% if chat_history %}
+            {% for chat in chat_history %}
+            <div style="padding: 0.5rem 0; border-bottom: 1px solid #eee;">
+                <strong>Q:</strong> {{ chat.question|truncatechars:50 }}<br>
+                <small>{{ chat.created_at|date:"M d, H:i" }}</small>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>No chat history. <a href="/">Chat with AI!</a></p>
+        {% endif %}
+    </div>
+</div>
+
+<div style="margin-top: 2rem; text-align: center;">
+    <a href="{% url 'identify_leaf' %}" class="btn btn-primary">🌿 Identify New Leaf</a>
+</div>
+{% endblock %}
