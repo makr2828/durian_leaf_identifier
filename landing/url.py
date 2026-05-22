@@ -12,6 +12,4 @@ urlpatterns = [
     path('identify-leaf/', views.identify_leaf_view, name='identify_leaf'),
     path('submit-query/', views.submit_query, name='submit_query'),
     path('clear-chat/', views.clear_chat_history, name='clear_chat_history'),
-    path('test/', views.test_page, name='test_page'),
-    path('chat-new/', views.chat_new, name='chat_new'),  # ADD THIS LINE
 ]

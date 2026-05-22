@@ -5,27 +5,83 @@
 <style>
     .admin-stats {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
         gap: 1.5rem;
         margin-bottom: 2rem;
     }
 
-    .admin-card {
+    .stat-card {
         background: white;
         padding: 1.5rem;
         border-radius: 15px;
         text-align: center;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        transition: all 0.3s;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
     }
 
-    .admin-number {
-        font-size: 2rem;
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+
+    .stat-card.active {
+        background: linear-gradient(135deg, #1a6b3e, #2ecc71);
+        color: white;
+    }
+
+    .stat-card.active .stat-number,
+    .stat-card.active .stat-label {
+        color: white;
+    }
+
+    .stat-card.active::before {
+        content: "✓";
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 20px;
+        opacity: 0.5;
+    }
+
+    .stat-number {
+        font-size: 2.2rem;
         font-weight: 800;
-        color: #e74c3c;
+        color: #1a6b3e;
+        transition: color 0.3s;
     }
 
-    .data-table {
-        overflow-x: auto;
+    .stat-label {
+        color: #666;
+        font-size: 0.8rem;
+        margin-top: 0.5rem;
+        transition: color 0.3s;
+    }
+
+    .stat-icon {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        opacity: 0.5;
+    }
+
+    .admin-section {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+    }
+
+    .admin-section h3 {
+        padding: 1.25rem;
+        margin: 0;
+        background: #f8f9fa;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
     table {
@@ -34,20 +90,34 @@
     }
 
     th, td {
-        padding: 0.75rem;
+        padding: 0.9rem 1rem;
         text-align: left;
-        border-bottom: 1px solid #ddd;
+        border-bottom: 1px solid #eee;
     }
 
     th {
-        background: #27ae60;
-        color: white;
+        background: #f8f9fa;
+        font-weight: 600;
+        color: #333;
+    }
+
+    tr:hover {
+        background: #fafafa;
+    }
+
+    .clickable-row {
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .clickable-row:hover {
+        background: #e8f5e9 !important;
     }
 
     .badge {
-        padding: 0.25rem 0.5rem;
-        border-radius: 5px;
-        font-size: 0.75rem;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.7rem;
         font-weight: 600;
     }
 
@@ -55,50 +125,542 @@
         background: #e74c3c;
         color: white;
     }
+
+    .badge-user {
+        background: #27ae60;
+        color: white;
+    }
+
+    .chat-preview {
+        max-width: 300px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: #555;
+        font-size: 0.85rem;
+    }
+
+    /* Filter Info Bar */
+    .filter-info {
+        background: #e8f5e9;
+        padding: 0.75rem 1.25rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .clear-filter {
+        background: none;
+        border: none;
+        color: #1a6b3e;
+        cursor: pointer;
+        font-size: 0.8rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 5px;
+    }
+
+    .clear-filter:hover {
+        background: rgba(0,0,0,0.05);
+    }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        animation: fadeIn 0.3s;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .modal-content {
+        background-color: white;
+        margin: 5% auto;
+        padding: 0;
+        width: 90%;
+        max-width: 700px;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        animation: slideDown 0.3s;
+    }
+
+    @keyframes slideDown {
+        from {
+            transform: translateY(-50px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .modal-header {
+        padding: 1.25rem;
+        background: linear-gradient(135deg, #1a6b3e, #2ecc71);
+        color: white;
+        border-radius: 20px 20px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-header h3 {
+        margin: 0;
+        font-size: 1.2rem;
+    }
+
+    .close-modal {
+        background: rgba(255,255,255,0.2);
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+    }
+
+    .close-modal:hover {
+        background: rgba(255,255,255,0.3);
+        transform: scale(1.05);
+    }
+
+    .modal-body {
+        padding: 1.5rem;
+        max-height: 500px;
+        overflow-y: auto;
+    }
+
+    .chat-detail {
+        margin-bottom: 1.5rem;
+    }
+
+    .chat-label {
+        font-weight: 600;
+        color: #1a6b3e;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .chat-text {
+        background: #f5f5f5;
+        padding: 1rem;
+        border-radius: 12px;
+        line-height: 1.5;
+        color: #333;
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #eee;
+    }
+
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        background: #1a6b3e;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+    }
+
+    .leaf-confidence {
+        background: #e8f5e9;
+        padding: 0.2rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: #1a6b3e;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 2.5rem;
+        color: #999;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.3;
+    }
+
+    @media (max-width: 768px) {
+        th, td {
+            padding: 0.5rem;
+            font-size: 0.75rem;
+        }
+        .chat-preview {
+            max-width: 150px;
+        }
+        .modal-content {
+            width: 95%;
+            margin: 10% auto;
+        }
+        .admin-stats {
+            gap: 0.75rem;
+        }
+        .stat-card {
+            padding: 1rem;
+        }
+    }
 </style>
 
 <div class="container">
-    <h1><i class="fas fa-crown"></i> Admin Dashboard</h1>
+    <h1 style="margin-bottom: 1.5rem;">🌱 Admin Dashboard</h1>
 
+    <!-- Clickable Statistics Cards -->
     <div class="admin-stats">
-        <div class="admin-card">
-            <div class="admin-number">{{ total_users }}</div>
-            <div>Total Users</div>
+        <div class="stat-card" data-filter="users" id="stat-users">
+            <div class="stat-icon">👥</div>
+            <div class="stat-number">{{ total_users }}</div>
+            <div class="stat-label">Total Users</div>
         </div>
-        <div class="admin-card">
-            <div class="admin-number">{{ total_chats }}</div>
-            <div>Total Chats</div>
+        <div class="stat-card" data-filter="active" id="stat-active">
+            <div class="stat-icon">✅</div>
+            <div class="stat-number">{{ active_users }}</div>
+            <div class="stat-label">Active Users</div>
         </div>
-        <div class="admin-card">
-            <div class="admin-number">{{ total_leaf_ids }}</div>
-            <div>Leaf Identifications</div>
+        <div class="stat-card" data-filter="chats" id="stat-chats">
+            <div class="stat-icon">💬</div>
+            <div class="stat-number">{{ total_chats }}</div>
+            <div class="stat-label">Total Chats</div>
+        </div>
+        <div class="stat-card" data-filter="leaves" id="stat-leaves">
+            <div class="stat-icon">🌿</div>
+            <div class="stat-number">{{ total_leaf_ids }}</div>
+            <div class="stat-label">Leaf Identifications</div>
         </div>
     </div>
 
-    <div class="section-card">
+    <!-- Filter Info Bar (shows when filter is active) -->
+    <div id="filterInfo" class="filter-info" style="display: none;">
+        <span>
+            <i class="fas fa-filter"></i>
+            Showing: <strong id="filterName"></strong>
+        </span>
+        <button id="clearFilterBtn" class="clear-filter">
+            <i class="fas fa-times"></i> Clear Filter
+        </button>
+    </div>
+
+    <!-- Users Table -->
+    <div class="admin-section" id="usersSection">
         <h3><i class="fas fa-users"></i> Registered Users</h3>
-        <div class="data-table">
-            <table>
+        <div style="overflow-x: auto;">
+            <table id="usersTable">
                 <thead>
                     <tr>
                         <th>Username</th>
                         <th>Email</th>
-                        <th>Joined</th>
+                        <th>Full Name</th>
+                        <th>Date Joined</th>
                         <th>Status</th>
                     </tr>
                 </thead>
-                <tbody>
-                    {% for u in all_users %}
+                <tbody id="usersTableBody">
+                    {% for user in all_users %}
                     <tr>
-                        <td>{{ u.username }}</td>
-                        <td>{{ u.email }}</td>
-                        <td>{{ u.date_joined|date:"Y-m-d" }}</td>
-                        <td>{% if u.is_superuser %}<span class="badge badge-admin">Admin</span>{% else %}User{% endif %}</td>
+                        <td>
+                            <strong>{{ user.username }}</strong>
+                            {% if user == request.user %}
+                                <span style="font-size: 0.7rem; color: #27ae60;"> (You)</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ user.email|default:"—" }}</td>
+                        <td>{{ user.get_full_name|default:"—" }}</td>
+                        <td>{{ user.date_joined|date:"M d, Y" }}</td>
+                        <td>
+                            {% if user.is_superuser %}
+                                <span class="badge badge-admin">Admin</span>
+                            {% else %}
+                                <span class="badge badge-user">User</span>
+                            {% endif %}
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
+
+    <!-- Chats Table (hidden initially, shown when clicking stats) -->
+    <div class="admin-section" id="chatsSection" style="display: none;">
+        <h3><i class="fas fa-comments"></i> Chat History <span style="font-size: 0.8rem; font-weight: normal;">(Click any row to view full conversation)</span></h3>
+        <div style="overflow-x: auto;">
+            <table id="chatsTable">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Question</th>
+                        <th>Answer</th>
+                        <th>Date/Time</th>
+                    </tr>
+                </thead>
+                <tbody id="chatsTableBody">
+                    {% for chat in all_chats %}
+                    <tr class="clickable-row" data-chat-id="{{ chat.id }}"
+                        data-user="{{ chat.user.username }}"
+                        data-question="{{ chat.question|escapejs }}"
+                        data-answer="{{ chat.answer|escapejs }}"
+                        data-time="{{ chat.created_at|date:'M d, Y H:i:s' }}">
+                        <td>
+                            <strong>{{ chat.user.username }}</strong>
+                            <br>
+                            <small style="color: #888;">{{ chat.user.email|default:"no email" }}</small>
+                        </td>
+                        <td class="chat-preview" title="{{ chat.question }}">
+                            {{ chat.question|truncatechars:60 }}
+                        </td>
+                        <td class="chat-preview" title="{{ chat.answer }}">
+                            {{ chat.answer|truncatechars:80 }}
+                        </td>
+                        <td style="white-space: nowrap;">
+                            {{ chat.created_at|date:"M d, H:i" }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Leaf IDs Table (hidden initially, shown when clicking stats) -->
+    <div class="admin-section" id="leavesSection" style="display: none;">
+        <h3><i class="fas fa-leaf"></i> Leaf Identifications</h3>
+        <div style="overflow-x: auto;">
+            <table id="leavesTable">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Identified As</th>
+                        <th>Confidence</th>
+                        <th>Features</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody id="leavesTableBody">
+                    {% for leaf in all_leaf_ids %}
+                    <tr>
+                        <td><strong>{{ leaf.user.username }}</strong></td>
+                        <td><span style="font-weight: 600; color: #1a6b3e;">{{ leaf.identified_variety|default:"Processing..." }}</span></td>
+                        <td>{% if leaf.confidence_score > 0 %}<span class="leaf-confidence">{{ leaf.confidence_score }}%</span>{% else %}—{% endif %}</td>
+                        <td class="chat-preview" title="{{ leaf.leaf_features }}">{{ leaf.leaf_features|truncatechars:50|default:"No data" }}</td>
+                        <td style="white-space: nowrap;">{{ leaf.created_at|date:"M d, H:i" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+        <a href="/admin/" class="btn btn-primary" style="background: #1a6b3e;">
+            <i class="fas fa-cog"></i> Django Admin Panel
+        </a>
+    </div>
 </div>
+
+<!-- Modal for Chat Details -->
+<div id="chatModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-comment-dots"></i> Chat Conversation</h3>
+            <button class="close-modal">&times;</button>
+        </div>
+        <div class="modal-body" id="modalBody"></div>
+    </div>
+</div>
+
+<script>
+    // Get all sections
+    const usersSection = document.getElementById('usersSection');
+    const chatsSection = document.getElementById('chatsSection');
+    const leavesSection = document.getElementById('leavesSection');
+    const filterInfo = document.getElementById('filterInfo');
+    const filterNameSpan = document.getElementById('filterName');
+    const clearFilterBtn = document.getElementById('clearFilterBtn');
+
+    // Get all stat cards
+    const statCards = document.querySelectorAll('.stat-card');
+
+    // Function to show specific section and hide others
+    function showSection(sectionName, displayName) {
+        // Hide all sections
+        usersSection.style.display = 'none';
+        chatsSection.style.display = 'none';
+        leavesSection.style.display = 'none';
+
+        // Remove active class from all stat cards
+        statCards.forEach(card => card.classList.remove('active'));
+
+        // Show selected section
+        if (sectionName === 'users') {
+            usersSection.style.display = 'block';
+            document.getElementById('stat-users').classList.add('active');
+        } else if (sectionName === 'chats') {
+            chatsSection.style.display = 'block';
+            document.getElementById('stat-chats').classList.add('active');
+        } else if (sectionName === 'leaves') {
+            leavesSection.style.display = 'block';
+            document.getElementById('stat-leaves').classList.add('active');
+        } else if (sectionName === 'active') {
+            usersSection.style.display = 'block';
+            document.getElementById('stat-active').classList.add('active');
+            // Filter to show only active users
+            filterUsersByActive(true);
+            displayName = 'Active Users';
+        }
+
+        // Show filter info bar
+        if (sectionName !== 'users' || sectionName === 'active') {
+            filterInfo.style.display = 'flex';
+            filterNameSpan.textContent = displayName;
+        } else {
+            filterInfo.style.display = 'none';
+        }
+    }
+
+    // Function to filter users by active status
+    function filterUsersByActive(activeOnly) {
+        const tableBody = document.getElementById('usersTableBody');
+        const rows = tableBody.querySelectorAll('tr');
+
+        rows.forEach(row => {
+            // For now, since all users are active, we'll show all
+            // You can add more sophisticated filtering if needed
+            row.style.display = activeOnly ? '' : '';
+        });
+    }
+
+    // Reset to show all users (default view)
+    function showAllUsers() {
+        usersSection.style.display = 'block';
+        chatsSection.style.display = 'none';
+        leavesSection.style.display = 'none';
+
+        statCards.forEach(card => card.classList.remove('active'));
+        filterInfo.style.display = 'none';
+
+        // Reset any filters
+        const tableBody = document.getElementById('usersTableBody');
+        const rows = tableBody.querySelectorAll('tr');
+        rows.forEach(row => row.style.display = '');
+    }
+
+    // Add click handlers to stat cards
+    document.getElementById('stat-users').addEventListener('click', () => {
+        showSection('users', 'All Users');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    document.getElementById('stat-active').addEventListener('click', () => {
+        showSection('active', 'Active Users');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    document.getElementById('stat-chats').addEventListener('click', () => {
+        showSection('chats', 'Chat History');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    document.getElementById('stat-leaves').addEventListener('click', () => {
+        showSection('leaves', 'Leaf Identifications');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // Clear filter button
+    clearFilterBtn.addEventListener('click', () => {
+        showAllUsers();
+    });
+
+    // Modal functionality for clickable chat rows
+    const modal = document.getElementById('chatModal');
+    const modalBody = document.getElementById('modalBody');
+    const closeModal = document.querySelector('.close-modal');
+
+    // Make all chat rows clickable (delegation for dynamically shown rows)
+    document.addEventListener('click', function(e) {
+        const row = e.target.closest('.clickable-row');
+        if (row) {
+            const user = row.dataset.user;
+            const question = row.dataset.question;
+            const answer = row.dataset.answer;
+            const time = row.dataset.time;
+
+            modalBody.innerHTML = `
+                <div class="user-info">
+                    <div class="user-avatar">${user.charAt(0).toUpperCase()}</div>
+                    <div>
+                        <strong>${user}</strong><br>
+                        <small style="color: #888;">${time}</small>
+                    </div>
+                </div>
+                <div class="chat-detail">
+                    <div class="chat-label">
+                        <i class="fas fa-user-circle"></i> User Question:
+                    </div>
+                    <div class="chat-text">
+                        ${question.replace(/\n/g, '<br>')}
+                    </div>
+                </div>
+                <div class="chat-detail">
+                    <div class="chat-label">
+                        <i class="fas fa-robot"></i> DurianBot Answer:
+                    </div>
+                    <div class="chat-text" style="background: #e8f5e9;">
+                        ${answer.replace(/\n/g, '<br>')}
+                    </div>
+                </div>
+            `;
+            modal.style.display = 'block';
+        }
+    });
+
+    // Close modal when clicking X
+    closeModal.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+
+    // Close modal when clicking outside
+    window.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+
+    // Close with Escape key
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && modal.style.display === 'block') {
+            modal.style.display = 'none';
+        }
+    });
+</script>
 {% endblock %}
