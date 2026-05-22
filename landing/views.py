@@ -29,6 +29,13 @@ def register_view(request):
         form = RegisterForm()
     return render(request, 'landing/register.html', {'form': form})
 
+@login_required
+def get_chat_history(request):
+    """Get user's chat history"""
+    from .models import ChatHistory
+    chats = ChatHistory.objects.filter(user=request.user).order_by('created_at')[:50]
+    chat_list = [{'question': c.question, 'answer': c.answer, 'time': c.created_at.strftime('%H:%M')} for c in chats]
+    return JsonResponse({'chats': chat_list})
 
 def login_view(request):
     if request.method == 'POST':
